@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>250萬還債戰鬥準則</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="250萬作戰">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0a; --surface:#111; --red:#e8281e; --gold:#c9a227; --blue:#2e7db2;
+  --text:#e8e2d9; --dim:#888880; --border:#2a2a2a; --bright:#3a3a3a;
+  --fd:'Bebas Neue',sans-serif; --fb:'Noto Sans TC',sans-serif; --fm:'IBM Plex Mono',monospace;
+  --green:#27ae60;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;background:var(--bg);color:var(--text);font-family:var(--fb);overflow-x:hidden;}
+
+/* ── HEADER ── */
+.site-header{background:var(--surface);border-bottom:1px solid var(--bright);padding:0 24px;display:flex;align-items:stretch;justify-content:space-between;flex-wrap:wrap;}
+.header-brand{display:flex;align-items:center;gap:14px;padding:14px 0;}
+.header-badge{width:7px;height:32px;background:var(--red);flex-shrink:0;}
+.header-title{font-family:var(--fd);font-size:clamp(1.3rem,4vw,2rem);letter-spacing:3px;line-height:1;}
+.header-sub{font-family:var(--fm);font-size:0.6rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.header-deadline{display:flex;align-items:center;padding:14px 0;}
+.dl-label{font-family:var(--fm);font-size:0.6rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+.dl-value{font-family:var(--fd);font-size:clamp(1.2rem,3vw,1.7rem);color:var(--red);letter-spacing:2px;}
+
+/* ── TABS ── */
+.nav-tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;}
+.tab-btn{background:transparent;color:var(--dim);border:none;border-bottom:3px solid transparent;padding:13px 20px;font-family:var(--fb);font-size:0.88rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;margin-bottom:-1px;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--red);}
+.page-content{display:none;}
+.page-content.active{display:block;}
+
+/* ── DASHBOARD ── */
+#dashboard{padding:24px 20px;}
+.dashboard-container{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+.brand-section{background:var(--surface);border:1px solid var(--bright);border-left:5px solid var(--red);padding:22px 26px;animation:fadeUp .4s ease both;}
+.brand-section:nth-child(2){animation-delay:.08s;}
+.brand-section:nth-child(3){animation-delay:.16s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.brand-header{display:flex;align-items:center;gap:11px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid var(--border);}
+.brand-name{font-family:var(--fd);font-size:1.6rem;letter-spacing:3px;}
+.brand-tag{font-family:var(--fm);font-size:0.58rem;letter-spacing:2px;color:var(--dim);text-transform:uppercase;border:1px solid var(--bright);padding:2px 6px;}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:18px 24px;}
+.metric-label{font-family:var(--fm);font-size:0.6rem;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;line-height:1.5;}
+.metric-value{font-family:var(--fd);font-size:clamp(3rem,6vw,4.5rem);color:var(--red);line-height:1;}
+.metric-value.n{color:var(--text);}.metric-value.g{color:var(--gold);}.metric-value.b{color:var(--blue);}
+.unit{font-family:var(--fb);font-size:0.82rem;color:var(--dim);margin-left:2px;font-weight:400;}
+
+/* ══════════════════════════════════════════
+   MANDALA
+══════════════════════════════════════════ */
+#mandala{padding:22px 0 40px;}
+.mandala-title{text-align:center;font-family:var(--fd);font-size:1.1rem;letter-spacing:5px;color:var(--dim);text-transform:uppercase;margin-bottom:10px;}
+
+/* ── MANDALA SCORE BAR ── */
+.mandala-score-bar{
+  max-width:600px;margin:0 auto 18px;padding:0 16px;
+  display:flex;align-items:center;gap:16px;
+}
+.msb-label{font-family:var(--fm);font-size:0.58rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.msb-track{flex:1;background:var(--bright);height:3px;border-radius:2px;}
+.msb-fill{background:var(--gold);height:3px;border-radius:2px;transition:width .4s ease;width:0%;}
+.msb-count{font-family:var(--fd);font-size:1.4rem;color:var(--gold);letter-spacing:2px;white-space:nowrap;min-width:80px;text-align:right;}
+
+/* ── DESKTOP: CSS-var driven, no transform ── */
+.mandala-desktop{display:none; padding:0 16px;}
+.mandala-wrapper{
+  width: calc(var(--cell-w)*9 + 30px);
+  max-width: 100%;
+  margin: 0 auto;
+  background:#050505;
+  padding:4px;
+  display:grid;
+  grid-template-columns:repeat(3, calc(var(--cell-w)*3 + 4px));
+  grid-template-rows:repeat(3, calc(var(--cell-h)*3 + 4px));
+  gap:4px;
+  border:1px solid var(--bright);
+  --cell-w:70px;
+  --cell-h:60px;
+}
+.m-block{
+  background:#181818;
+  display:grid;
+  grid-template-columns:repeat(3, var(--cell-w));
+  grid-template-rows:repeat(3, var(--cell-h));
+  gap:2px;
+}
+.m-cell{
+  width:var(--cell-w);
+  height:var(--cell-h);
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:4px 6px;
+  font-size:calc(min(var(--cell-w), var(--cell-h)) * 0.145);
+  font-weight:700;color:var(--dim);
+  cursor:pointer;transition:background .15s,color .15s;
+  line-height:1.35;font-family:var(--fb);
+  overflow:hidden;
+}
+.m-cell:hover{background:#1d1d1d;color:var(--text);}
+.m-block .m-cell:nth-child(5){
+  background:#1c1c1c;color:var(--text);font-weight:900;
+  font-size:calc(min(var(--cell-w), var(--cell-h)) * 0.158);
+  border:1px solid var(--bright);
+}
+#block-4 .m-cell:nth-child(5){
+  background:var(--red);color:#fff;
+  font-size:calc(min(var(--cell-w), var(--cell-h)) * 0.175);
+  font-weight:900;border:none;
+}
+#block-4 .m-cell:not(:nth-child(5)){
+  background:#141414;color:var(--dim);
+  font-size:calc(min(var(--cell-w), var(--cell-h)) * 0.132);
+}
+#block-4 .m-cell:not(:nth-child(5)):hover{background:#1d1d1d;color:var(--text);}
+
+/* Tooltip */
+#custom-tooltip{
+  position:fixed;background:rgba(8,8,8,.97);color:var(--text);
+  padding:11px 15px;font-family:var(--fb);font-size:0.84rem;line-height:1.65;
+  pointer-events:none;z-index:9999;display:none;max-width:280px;
+  border:1px solid var(--bright);border-left:4px solid var(--red);
+  box-shadow:0 16px 40px rgba(0,0,0,.85);
+}
+
+/* ── MOBILE CARDS ── */
+.mandala-mobile{display:none;padding:0 12px;}
+.mob-core{background:var(--red);padding:18px 20px;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
+.mob-core-icon{font-size:1.8rem;line-height:1;}
+.mob-core-label{font-family:var(--fm);font-size:0.6rem;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:2px;}
+.mob-core-title{font-family:var(--fd);font-size:2rem;letter-spacing:2px;color:#fff;line-height:1.1;}
+.mob-core-sub{font-size:0.75rem;color:rgba(255,255,255,.75);margin-top:4px;}
+.mob-cards{display:flex;flex-direction:column;gap:8px;}
+.mob-card{background:var(--surface);border:1px solid var(--bright);border-left:3px solid var(--dim);overflow:hidden;}
+.mob-card.open{border-left-color:var(--red);}
+.mob-card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+.mob-card-left{display:flex;align-items:center;gap:10px;}
+.mob-card-num{font-family:var(--fm);font-size:0.6rem;color:var(--dim);letter-spacing:1px;min-width:22px;}
+.mob-card-name{font-family:var(--fd);font-size:1.25rem;letter-spacing:2px;line-height:1;}
+.mob-card-arrow{font-size:0.7rem;color:var(--dim);transition:transform .25s;flex-shrink:0;}
+.mob-card.open .mob-card-arrow{transform:rotate(180deg);}
+.mob-card-body{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.mob-card.open .mob-card-body{max-height:800px;}
+.mob-items{padding:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.mob-item{background:#151515;border:1px solid var(--border);padding:10px;border-radius:2px;}
+.mob-item-title{font-weight:900;font-size:0.8rem;color:var(--text);margin-bottom:4px;line-height:1.3;}
+.mob-item-desc{font-size:0.7rem;color:var(--dim);line-height:1.55;}
+
+/* ── RESPONSIVE ── */
+@media(min-width:700px){
+  .mandala-desktop{display:block;}
+  .mandala-mobile{display:none;}
+}
+@media(max-width:699px){
+  .mandala-desktop{display:none;}
+  .mandala-mobile{display:block;}
+  .site-header{padding:0 14px;}.nav-tabs{padding:0 10px;}
+  .tab-btn{padding:11px 12px;font-size:0.82rem;}
+  #dashboard{padding:16px 12px;}.brand-section{padding:16px 14px;}
+  .metrics-grid{grid-template-columns:repeat(2,1fr);gap:14px 12px;}
+  .header-deadline{display:none;}
+  #mandala{padding:18px 0 36px;}
+}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bright);border-radius:2px;}
+
+/* ══════════════════════════════════════════
+   DAILY — CHECKLIST SYSTEM
+══════════════════════════════════════════ */
+#daily{
+  padding:14px 20px 24px;
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* ── Score Command Panel ── */
+.daily-command{
+  background:var(--surface);
+  border:1px solid var(--bright);
+  border-left:5px solid var(--red);
+  padding:14px 20px 13px;
+  animation:fadeUp .3s ease both;
+  flex-shrink:0;
+}
+.dcp-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.dcp-left{display:flex;align-items:center;gap:20px;}
+.dcp-date{font-family:var(--fm);font-size:0.55rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;}
+.dcp-title{font-family:var(--fd);font-size:1rem;letter-spacing:4px;color:var(--dim);text-transform:uppercase;}
+.dcp-score-block{display:flex;align-items:baseline;gap:8px;}
+.dcp-score-label{font-family:var(--fm);font-size:0.55rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;}
+.dcp-score-num{font-family:var(--fd);font-size:2.2rem;line-height:1;color:var(--red);letter-spacing:2px;}
+.dcp-score-max{font-family:var(--fm);font-size:0.65rem;color:var(--dim);}
+.dcp-bar-row{margin-top:10px;display:flex;align-items:center;gap:12px;}
+.dcp-bar-bg{flex:1;background:var(--bright);height:3px;border-radius:2px;}
+.dcp-bar-fill{background:var(--red);height:3px;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;}
+.dcp-pct{font-family:var(--fm);font-size:0.6rem;color:var(--dim);min-width:36px;text-align:right;}
+.dcp-stats{display:flex;gap:18px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.dcp-stat{font-family:var(--fm);font-size:0.56rem;color:var(--dim);letter-spacing:1px;}
+.dcp-stat span{color:var(--text);font-weight:700;}
+
+/* ── Task Body: 2-column grid ── */
+.daily-body{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  animation:fadeUp .35s ease .05s both;
+}
+.daily-col{display:flex;flex-direction:column;gap:5px;}
+
+.task-section-label{
+  font-family:var(--fm);font-size:0.52rem;letter-spacing:3px;color:var(--dim);
+  text-transform:uppercase;padding:6px 0 5px;border-bottom:1px solid var(--border);
+  margin-bottom:1px;flex-shrink:0;
+}
+
+.task-row{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-left:3px solid var(--bright);
+  display:flex;align-items:stretch;
+  cursor:pointer;
+  transition:border-color .15s, background .15s, opacity .25s;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+  overflow:hidden;
+}
+.task-row:hover{background:#161616;}
+.task-row.work-row{border-left-color:#2e4a6a;}
+.task-row.personal-row{border-left-color:#4a3a10;}
+.task-row.checked{opacity:0.42;}
+.task-row.checked .task-name{text-decoration:line-through;color:var(--dim);}
+.task-row.work-row.checked{border-left-color:var(--blue);}
+.task-row.personal-row.checked{border-left-color:var(--gold);}
+
+/* Checkbox area */
+.task-check-area{
+  width:38px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border-right:1px solid var(--border);
+}
+.task-checkbox{
+  width:15px;height:15px;border:2px solid var(--bright);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.task-row.checked .task-checkbox{background:var(--red);border-color:var(--red);}
+.task-check-tick{display:none;color:#fff;font-size:9px;line-height:1;font-weight:900;}
+.task-row.checked .task-check-tick{display:block;}
+
+/* Main content — compact, no desc shown */
+.task-content{flex:1;padding:8px 10px;min-width:0;display:flex;align-items:center;}
+.task-name{font-size:0.8rem;font-weight:700;color:var(--text);line-height:1.25;transition:color .2s;}
+
+/* Right meta — minimal */
+.task-meta{display:flex;align-items:center;gap:5px;padding:0 10px;flex-shrink:0;}
+.task-pts{font-family:var(--fd);font-size:1.1rem;color:var(--gold);letter-spacing:1px;line-height:1;}
+.task-pts-label{font-family:var(--fm);font-size:0.42rem;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
+/* hide badge in compact mode */
+.task-badge{display:none;}
+
+/* ── Bonus Block ── */
+.bonus-block{
+  background:var(--surface);
+  border:1px solid var(--bright);
+  border-left:3px solid #5a4a8a;
+  padding:12px 16px;
+  display:flex;flex-direction:column;gap:8px;
+  animation:fadeUp .4s ease .1s both;
+  flex-shrink:0;
+}
+.bonus-header{display:flex;align-items:center;justify-content:space-between;}
+.bonus-label{font-family:var(--fm);font-size:0.52rem;letter-spacing:3px;color:#9b79cc;text-transform:uppercase;}
+.bonus-star-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:1.4rem;line-height:1;
+  color:var(--bright);
+  transition:color .2s, transform .15s;
+  padding:0;flex-shrink:0;
+}
+.bonus-star-btn.active{color:#f1c40f;}
+.bonus-star-btn:hover{transform:scale(1.2);}
+.bonus-input-row{display:flex;align-items:center;gap:10px;}
+.bonus-input{
+  flex:1;background:var(--bg);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fb);font-size:0.82rem;
+  padding:7px 10px;outline:none;
+  transition:border-color .2s;
+}
+.bonus-input:focus{border-color:#5a4a8a;}
+.bonus-input::placeholder{color:var(--bright);}
+.bonus-pts-label{font-family:var(--fd);font-size:1.1rem;color:#f1c40f;letter-spacing:1px;white-space:nowrap;}
+
+/* ── Done State ── */
+.daily-done{
+  display:none;text-align:center;padding:28px 20px;
+  animation:fadeUp .4s ease;
+  border:1px solid var(--bright);background:var(--surface);
+  flex-shrink:0;
+}
+.daily-done.visible{display:block;}
+.done-icon{font-size:2.5rem;margin-bottom:12px;}
+.done-verse{font-size:0.9rem;line-height:1.8;color:var(--text);font-style:italic;background:var(--bg);border:1px solid var(--bright);border-left:4px solid var(--gold);padding:16px 20px;margin-bottom:6px;text-align:left;}
+.done-ref{font-family:var(--fm);font-size:0.62rem;color:var(--gold);letter-spacing:2px;text-align:right;padding:0 20px;}
+.done-reset{margin-top:18px;background:transparent;border:1px solid var(--bright);color:var(--dim);padding:9px 22px;font-family:var(--fb);font-size:0.8rem;cursor:pointer;letter-spacing:1px;}
+.done-reset:hover{color:var(--text);}
+
+/* ── HEATMAP ON MANDALA CELLS ── */
+.m-cell.lit{outline:none;}
+.m-cell.lit::after{
+  content:'';position:absolute;inset:0;
+  border-radius:1px;pointer-events:none;
+  background:var(--lit-color,rgba(255,255,255,.18));
+}
+.m-cell{position:relative;}
+
+@media(max-width:900px){
+  .daily-body{grid-template-columns:1fr;}
+}
+@media(max-width:699px){
+  #daily{padding:10px 12px 20px;gap:8px;}
+  .daily-command{padding:12px 14px 11px;}
+  .dcp-score-num{font-size:1.8rem;}
+  .dcp-left{flex-direction:column;align-items:flex-start;gap:4px;}
+  .task-check-area{width:34px;}
+  .task-content{padding:7px 8px;}
+  .task-name{font-size:0.76rem;}
+  .task-meta{padding:0 8px;}
+  .task-pts{font-size:1rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-brand">
+    <div class="header-badge"></div>
+    <div>
+      <div class="header-title">250萬還債戰鬥準則</div>
+      <div class="header-sub">Operation Debt Zero · Command Manual</div>
+    </div>
+  </div>
+  <div class="header-deadline">
+    <div><div class="dl-label">最終死線</div><div class="dl-value">2026 · 12 · 31</div></div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('daily',this)">日常</button>
+  <button class="tab-btn"        onclick="switchTab('dashboard',this)">死線警示板</button>
+  <button class="tab-btn"        onclick="switchTab('mandala',this)">曼陀羅計畫表</button>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page-content">
+  <div class="dashboard-container">
+    <div class="brand-section" style="border-left-color:var(--red);">
+      <div class="brand-header"><div class="brand-name" style="color:var(--text);">OCARD</div><div class="brand-tag">業績防線</div></div>
+      <div class="metrics-grid">
+        <div><div class="metric-label">近三月 SaaS 滾動加總</div><div class="metric-value n">60<span class="unit">萬</span></div></div>
+        <div><div class="metric-label">每月業績目標</div><div class="metric-value n">35<span class="unit">萬</span></div></div>
+        <div><div class="metric-label">自來客轉換率</div><div class="metric-value">≥8<span class="unit">%</span></div></div>
+        <div><div class="metric-label">每月保底 SaaS 成交</div><div class="metric-value">2<span class="unit">筆</span></div></div>
+        <div><div class="metric-label">高意願準成交漏斗</div><div class="metric-value">10<span class="unit">家</span></div></div>
+        <div><div class="metric-label">每日陌生開發聯繫</div><div class="metric-value">5<span class="unit">名</span></div></div>
+      </div>
+    </div>
+    <div class="brand-section" style="border-left-color:var(--gold);">
+      <div class="brand-header"><div class="brand-name" style="color:var(--gold);">川輝</div><div class="brand-tag">高客單開發</div></div>
+      <div class="metrics-grid">
+        <div><div class="metric-label">每月單月業績底線</div><div class="metric-value g">≥30<span class="unit">萬</span></div></div>
+        <div><div class="metric-label">每日陌生開發聯繫</div><div class="metric-value g">1<span class="unit">家</span></div></div>
+      </div>
+    </div>
+    <div class="brand-section" style="border-left-color:var(--blue);">
+      <div class="brand-header"><div class="brand-name" style="color:var(--blue);">JADEX</div><div class="brand-tag">音響</div></div>
+      <div class="metrics-grid">
+        <div><div class="metric-label">每月社群貼文產出</div><div class="metric-value b">4<span class="unit">篇</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANDALA -->
+<div id="mandala" class="page-content">
+  <div class="mandala-title">八大作戰維度 · Mandala Planning Matrix</div>
+
+  <!-- Mandala Score Bar -->
+  <div class="mandala-score-bar">
+    <div class="msb-label">今日格點</div>
+    <div class="msb-track"><div class="msb-fill" id="msb-fill"></div></div>
+    <div class="msb-count"><span id="msb-count">0</span> <span style="font-size:0.85rem;color:var(--dim);">/ 72</span></div>
+  </div>
+
+  <!-- DESKTOP: CSS-var sizing -->
+  <div class="mandala-desktop" id="mandala-desktop">
+    <div class="mandala-wrapper" id="mandala-container"></div>
+  </div>
+
+  <!-- MOBILE: accordion cards -->
+  <div class="mandala-mobile">
+    <div class="mob-core">
+      <div class="mob-core-icon">⚔️</div>
+      <div>
+        <div class="mob-core-label">核心目標 · Core Objective</div>
+        <div class="mob-core-title">賺到 250萬</div>
+        <div class="mob-core-sub">死線：2026年12月31日 · 沒有退路</div>
+      </div>
+    </div>
+    <div class="mob-cards" id="mob-cards"></div>
+  </div>
+
+</div>
+
+<!-- DAILY -->
+<div id="daily" class="page-content active">
+
+  <!-- Command Panel -->
+  <div class="daily-command">
+    <div class="dcp-row">
+      <div class="dcp-left">
+        <div class="dcp-date" id="dcp-date"></div>
+        <div class="dcp-title">今日作戰積分</div>
+      </div>
+      <div class="dcp-score-block">
+        <div class="dcp-score-label">已得分&nbsp;</div>
+        <span class="dcp-score-num" id="dcp-score">0</span>
+        <span class="dcp-score-max" id="dcp-score-max">/ 19 分</span>
+      </div>
+    </div>
+    <div class="dcp-bar-row">
+      <div class="dcp-bar-bg"><div class="dcp-bar-fill" id="dcp-bar-fill"></div></div>
+      <div class="dcp-pct" id="dcp-pct">0%</div>
+    </div>
+    <div class="dcp-stats">
+      <div class="dcp-stat">完成 <span id="dcp-done-count">0</span> / <span id="dcp-total-count">14</span></div>
+      <div class="dcp-stat">工作 <span id="dcp-work-count">0</span> / 10</div>
+      <div class="dcp-stat">個人 <span id="dcp-personal-count">0</span> / 4</div>
+    </div>
+  </div>
+
+  <!-- Task 2-col body -->
+  <div class="daily-body" id="daily-body">
+    <!-- Left col: personal + work first half -->
+    <div class="daily-col" id="daily-col-left"></div>
+    <!-- Right col: work second half -->
+    <div class="daily-col" id="daily-col-right"></div>
+  </div>
+
+  <!-- Bonus Block -->
+  <div class="bonus-block">
+    <div class="bonus-header">
+      <div class="bonus-label">★ 加碼任務 · Bonus</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:var(--fm);font-size:0.52rem;color:var(--dim);letter-spacing:1px;">完成得</span>
+        <button class="bonus-star-btn" id="bonus-star" onclick="toggleBonus()" title="點擊標記完成">★</button>
+        <span class="bonus-pts-label">1 分</span>
+      </div>
+    </div>
+    <div class="bonus-input-row">
+      <input class="bonus-input" id="bonus-input" type="text" placeholder="今日加碼任務…（可自由填寫）" oninput="saveBonusText()" />
+    </div>
+  </div>
+
+  <!-- Done State -->
+  <div class="daily-done" id="daily-done">
+    <div class="done-icon">✝️</div>
+    <div class="done-verse" id="done-verse"></div>
+    <div class="done-ref" id="done-ref"></div>
+    <button class="done-reset" onclick="resetDaily()">↺ 重置今日任務</button>
+  </div>
+
+</div>
+
+<div id="custom-tooltip"></div>
+
+<script>
+/* ═══ DATA ═══ */
+const blocks = [
+  { center:"Ocard<br>業績攻堅", accent:"#e8281e", items:[
+    {s:"3天聯繫<br>逼單",      l:"嚴格執行 3 天內聯繫與逼單的鐵律，絕不讓名單釋出。"},
+    {s:"每日 8<br>陌開",      l:"每日執行 8 個陌生開發，主動控制流量，絕不將命運交給被動自來客。"},
+    {s:"痛點提問<br>SOP",     l:"每次通話強制套用痛點提問 SOP 並確實留存紀錄，絕不淪為純客服報價。"},
+    {s:"每週 3 場<br>碰面",   l:"每週強制安排至少 3 場 SaaS 深度碰面 Demo 簡報，主動拉大漏斗母數。"},
+    {s:"漏斗保<br>10 準客",   l:"每週五下午盤點漏斗，保持至少10個高意願客戶，無情剔除低意願名單。"},
+    {s:"盯近三月<br>60 萬",   l:"每日早晨檢視「近三月 60 萬」滾動看板，未達標當日陌生開發量直接加倍。"},
+    {s:"狙擊<br>KA100 名單",  l:"精準鎖定並開發 KA100 名單，追求專案額外獎金，暴力拉高客單價。"},
+    {s:"衝高標<br>拿團績",    l:"每月以高標、拿到團績為目標。"}
+  ]},
+  { center:"川輝<br>高客單開發", accent:"#c9a227", items:[
+    {s:"2天聯繫<br>Pro360",   l:"敏銳捕捉 Pro360 發包商機，2天內需要聯繫到客戶，絕不遺漏。"},
+    {s:"3天內<br>出報價",     l:"克服拖延：取得客戶需求後，強制執行「3天內出具報價或提案」的絕對死線。"},
+    {s:"每日向上<br>匯報",    l:"每日向老闆更新進度，並與業務總監探討商機及提案策略，借力高層資源打單。"},
+    {s:"30萬必<br>見面",      l:"專案預估規模達 30 萬以上，無條件安排線下實體拜訪，展現專業火力。"},
+    {s:"每日 5 封<br>客製信",  l:"每日鎖定 5 家無數位化能力的企業，針對其現有痛點發送客製化開發信。"},
+    {s:"主動設<br>下一步",    l:"每日主動推進潛在客戶進度，設定明確的下一步行動與期限，絕不被動等待。"},
+    {s:"鎖定30至<br>150萬",   l:"精準鎖定 30-150 萬級距的企業戶打擊，最大化時間投入產出比。"},
+    {s:"備妥<br>Prototype",  l:"需做足充足準備、能有 Prototype 就需要準備 Prototype。"}
+  ]},
+  { center:"外貌與<br>醫學介入", accent:"#9b59b6", items:[
+    {s:"嚴格抗痘<br>保養",    l:"每日嚴格執行皮膚科除痘醫囑、徹底清潔與後續保養。"},
+    {s:"規律點<br>人工淚液",  l:"規律點人工淚液，維持眼部濕潤無血絲。"},
+    {s:"睡前熱敷<br>雙眼",    l:"每日睡前確實熱敷雙眼，融化阻塞油脂，從根源緩解乾眼症。"},
+    {s:"15分鐘<br>肩頸拉筋",  l:"每日確實執行 15 分鐘肩頸拉筋放鬆，確保睡眠品質。"},
+    {s:"修正人體<br>工學",    l:"隨時有意識地修正工作時的桌椅與螢幕視角，阻絕痠痛根源。"},
+    {s:"雙週修剪<br>髮型",    l:"每兩週固定修剪髮型，每日出門前打理俐落專業感。"},
+    {s:"備 3 套<br>戰鬥服",   l:"依場合精準換裝 3 套合身戰鬥服，用外在品味掩蓋體態劣勢。"},
+    {s:"勤做臉部<br>健身",    l:"隨時注意臉部，常常做臉部健身動作。"}
+  ]},
+  { center:"體態與<br>精力管理", accent:"#27ae60", items:[
+    {s:"11點斷網<br>12點睡",  l:"11點後不要用手機、嚴格遵守 12 點前就寢紀律。"},
+    {s:"睡滿<br>8 小時",     l:"確保每日睡眠時間達 8 小時。"},
+    {s:"重訓備戰<br>Hyrox",   l:"規律執行重訓，目標放在2027年Hyrox比賽。"},
+    {s:"跑步練<br>心肺",     l:"規律執行跑步訓練，強化心肺耐力與業務體力。"},
+    {s:"每週球類<br>紓壓",    l:"每週參與球類運動，維持敏捷度並釋放壓力。"},
+    {s:"隨時挺胸<br>直腰",    l:"坐姿與站姿隨時有意識地挺直腰桿、打開胸腔。"},
+    {s:"補蛋白<br>均飲食",    l:"攝取優質蛋白質，注意飲食均衡。"},
+    {s:"日飲水<br>2000cc",   l:"每天至少喝2000cc的水。"}
+  ]},
+  { center:"賺到<br>250 萬", isCenter:true, items:[
+    {s:"Ocard<br>業績攻堅",  l:"穩定現金流與高抽成"},
+    {s:"川輝<br>高客單",     l:"爆發性還債準備金"},
+    {s:"外貌與<br>醫學介入",  l:"修復業務門面"},
+    {s:"體態與<br>精力管理",  l:"支撐高強度多工"},
+    {s:"業務<br>自動化",     l:"極致壓榨時間"},
+    {s:"商業<br>顧問思維",   l:"提升客單價的籌碼"},
+    {s:"槓桿型<br>人脈",     l:"精準渠道"},
+    {s:"財務與<br>心靈防線",  l:"水位控制"}
+  ]},
+  { center:"業務<br>自動化系統", accent:"#2e7db2", items:[
+    {s:"AI極速<br>產貼文",    l:"熟練運用 AI 工具極速產出 Jadex 音響社群貼文。"},
+    {s:"晨更進度<br>追蹤",    l:"每日開工前，第一時間更新並檢視 Ocard/川輝/Jadex 的極簡進度追蹤表。"},
+    {s:"批次處理<br>訊息",    l:"集中時段批次處理 Email 與零碎訊息，保護業務開發心流。"},
+    {s:"依賴系統<br>提醒",    l:"嚴格依賴工具提醒機制，每日早晨列出當天必須追蹤的報價與客戶名單。"},
+    {s:"建 FAQ<br>鍵盤捷徑",  l:"將歷史 Q&A 整理進 Notion，設定鍵盤替代文字（如 /faq），秒回初階問題。"},
+    {s:"3分鐘<br>套版合約",   l:"結合歷史報價數據推估價格，套用 Google Docs/Notion 的變數合約底稿，3 分鐘出檔。"},
+    {s:"錄音餵<br>NotebookLM", l:"客戶會議全面錄音轉錄，餵入 NotebookLM 建立專屬知識庫，達成極速檢索。"},
+    {s:"週五系統化<br>瑣事",   l:"週五固定撥出 30 分鐘覆盤工作流，找出一項重複性行政瑣事並將其系統化。"}
+  ]},
+  { center:"商業<br>顧問思維", accent:"#e67e22", items:[
+    {s:"每日閱讀<br>商訊",    l:"每日閱讀並吸收商業、科技與新聞知識。"},
+    {s:"提煉破冰<br>話題",    l:"將每日新聞資訊轉化為與客戶破冰的話題。"},
+    {s:"日用一條<br>心理學",  l:"刻意應用一條銷售心理學法則於實戰談判中，若沒有機會時間，則發在社群中。"},
+    {s:"月參兩場<br>商聚",    l:"每月參加兩場商業知識型聚會或活動。"},
+    {s:"練顧問式<br>儀態",    l:"刻意練習顧問式儀態。"},
+    {s:"診斷痛點<br>對話",    l:"刻意練習顧問式語氣，以「診斷痛點」取代「推銷功能」進行對話。"},
+    {s:"覆盤談判<br>盲點",    l:"覆盤每次談判，找出流失主導權的盲點並修正。"},
+    {s:"偷師頂尖<br>手腕",    l:"觀察並學習頂尖業務與高淨值客戶的思維手腕。"}
+  ]},
+  { center:"槓桿型<br>人脈", accent:"#16a085", items:[
+    {s:"結識科技<br>業務",    l:"持續打獵：主動結識電商、Chatbot、ERP、POS 領域業務。"},
+    {s:"拓展行銷<br>創業圈",  l:"持續打獵：積極拓展行銷窗口與創業家人脈。"},
+    {s:"週三內部<br>借力",    l:"內部借力：每週三進公司時，刻意與 Ocard 同事交流情報、分享市場資訊。"},
+    {s:"建互惠<br>轉介制",    l:"制度建立：靈活運用分潤機制，建立互惠派單與轉介模式。"},
+    {s:"定期喝咖啡<br>維繫",  l:"深度農耕：定期與已結識的異業夥伴喝咖啡交流，維繫信任與熱度。"},
+    {s:"無條件<br>引薦商機",  l:"深度農耕：記住商業夥伴的重要里程碑給予祝賀，有商機第一時間無條件引薦。"},
+    {s:"標籤化<br>人脈庫",    l:"系統化管理並標籤化自身的人脈資源庫。"},
+    {s:"拒絕無效<br>社交",    l:"徹底拒絕無效且無助於業績成長的社交聚會。"}
+  ]},
+  { center:"財務與<br>心靈防線", accent:"#c0392b", items:[
+    {s:"盯死2026<br>賺250萬",  l:"每日直視 2026 年 12 月 31 日目標：賺到 250 萬，保持極度飢渴的戰鬥力。"},
+    {s:"優先扣繳<br>硬支出",   l:"優先扣除並繳清底線硬支出（房租 8500、貸款 34500、孝親費 10000）。"},
+    {s:"發薪首日<br>秒還款",   l:"每月發薪日第一時間，不打折扣地執行信用卡 12 萬與朋友 17 萬的攤還計畫。"},
+    {s:"業務獎金<br>全鎖死",   l:"所有業務獎金強制鎖死並轉入還債帳戶，嚴禁挪用。"},
+    {s:"睡前嚴格<br>記帳",     l:"每日睡前完成當日所有開銷記帳，徹底杜絕無意識消費。"},
+    {s:"睡前禱告<br>交託",     l:"每日睡前靜心禱告，交託負債焦慮換取平靜。"},
+    {s:"早晨讀經<br>尋指引",   l:"每日早晨閱讀聖經，尋求指引並鞏固心靈防線。"},
+    {s:"達標打勾<br>正回饋",   l:"每清償一筆小額債務或領到大筆獎金，立刻在還款進度條上打勾，建立正向戰鬥回饋。"}
+  ]}
+];
+
+/* ═══ TAB ═══ */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page-content').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+  if(id==='mandala'){ setTimeout(sizeMandala, 0); setTimeout(sizeMandala, 100); }
+}
+
+/* ═══ CSS-VAR SIZING ═══ */
+function sizeMandala() {
+  const desktop = document.getElementById('mandala-desktop');
+  const wrapper = document.getElementById('mandala-container');
+  if (!desktop || !wrapper) return;
+  let avail = desktop.offsetWidth;
+  if (!avail) avail = Math.max(300, window.innerWidth - 32);
+  const headerH = (document.querySelector('.site-header')?.offsetHeight || 60)
+                + (document.querySelector('.nav-tabs')?.offsetHeight    || 44)
+                + (document.querySelector('.mandala-title')?.offsetHeight || 36)
+                + 60;
+  const viewH = window.innerHeight - headerH;
+  const cellW = Math.max(44, Math.min(120, (avail - 30) / 9));
+  const cellH = Math.max(36, Math.min(110, (viewH - 30) / 9));
+  wrapper.style.setProperty('--cell-w', cellW + 'px');
+  wrapper.style.setProperty('--cell-h', cellH + 'px');
+}
+
+window.addEventListener('resize', sizeMandala);
+sizeMandala();
+setTimeout(sizeMandala, 100);
+
+/* ═══ BUILD DESKTOP GRID ═══ */
+const wrap    = document.getElementById('mandala-container');
+const tooltip = document.getElementById('custom-tooltip');
+const posMap  = [0,1,2,3,5,6,7,8];
+
+const LIT_KEY = 'mandala_lit_v1';
+let litData = {};
+try { litData = JSON.parse(localStorage.getItem(LIT_KEY)||'{}'); } catch(e){}
+
+function saveLit(){ try{localStorage.setItem(LIT_KEY,JSON.stringify(litData));}catch(e){} }
+
+function updateMandalaScore() {
+  const count = Object.keys(litData).length;
+  const maxCells = 72; // 8 blocks × 8 non-center cells + center block 8 surrounding
+  document.getElementById('msb-count').textContent = count;
+  const pct = Math.min(100, (count / maxCells * 100));
+  document.getElementById('msb-fill').style.width = pct + '%';
+}
+
+blocks.forEach((block, bi) => {
+  const blockEl = document.createElement('div');
+  blockEl.className = 'm-block';
+  blockEl.id = `block-${bi}`;
+  const accent = block.accent || '#e8281e';
+  const litColor = hexToRgba(accent, 0.28);
+
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'm-cell';
+    const isCenter = (i === 4);
+    const isCoreBlock = block.isCenter;
+
+    if (isCenter) {
+      cell.innerHTML = block.center;
+      if (isCoreBlock) cell.dataset.detail = '目標：2026/12/31 賺到 250 萬。沒有退路。';
+    } else {
+      const item = block.items[posMap.indexOf(i)];
+      cell.innerHTML = item.s;
+      cell.dataset.detail = item.l;
+    }
+
+    const ck = `${bi}_${i}`;
+    if (litData[ck] && !isCenter) {
+      cell.style.setProperty('--lit-color', litColor);
+      cell.classList.add('lit');
+    }
+
+    if (!isCenter) {
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const on = cell.classList.toggle('lit');
+        if (on) {
+          cell.style.setProperty('--lit-color', litColor);
+          litData[ck] = true;
+        } else {
+          cell.style.removeProperty('--lit-color');
+          delete litData[ck];
+        }
+        saveLit();
+        updateMandalaScore();
+        tooltip.style.display = 'none';
+      });
+    }
+
+    cell.addEventListener('mouseenter', () => {
+      if (cell.dataset.detail) { tooltip.innerHTML = cell.dataset.detail; tooltip.style.display = 'block'; }
+    });
+    cell.addEventListener('mousemove', e => {
+      let x = e.clientX + 16, y = e.clientY + 16;
+      if (x + 285 > window.innerWidth)  x = e.clientX - 301;
+      if (y + 100 > window.innerHeight) y = e.clientY - 110;
+      tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
+    });
+    cell.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    blockEl.appendChild(cell);
+  }
+  wrap.appendChild(blockEl);
+});
+
+// Init mandala score on load
+updateMandalaScore();
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/* ═══ BUILD MOBILE CARDS ═══ */
+const cardContainer = document.getElementById('mob-cards');
+const mobileOrder   = [0,1,2,3,5,6,7,8];
+const mobileNames   = ["Ocard 業績攻堅","川輝 高客單開發","外貌與醫學介入","體態與精力管理",
+                        "業務自動化系統","商業顧問思維","槓桿型人脈","財務與心靈防線"];
+mobileOrder.forEach((bi, idx) => {
+  const block  = blocks[bi];
+  const accent = block.accent || '#e8281e';
+  const card   = document.createElement('div');
+  card.className = 'mob-card';
+  card.style.borderLeftColor = accent;
+  card.innerHTML = `
+    <div class="mob-card-header" onclick="toggleCard(this)">
+      <div class="mob-card-left">
+        <span class="mob-card-num">0${idx+1}</span>
+        <span class="mob-card-name" style="color:${accent}">${mobileNames[idx]}</span>
+      </div>
+      <span class="mob-card-arrow">▼</span>
+    </div>
+    <div class="mob-card-body">
+      <div class="mob-items">
+        ${block.items.map(item => `
+          <div class="mob-item">
+            <div class="mob-item-title">${item.s.replace('<br>',' ')}</div>
+            <div class="mob-item-desc">${item.l}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  cardContainer.appendChild(card);
+});
+
+function toggleCard(header) {
+  const card   = header.parentElement;
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.mob-card.open').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+/* ═══════════════════════════════════════════
+   DAILY CHECKLIST SYSTEM
+═══════════════════════════════════════════ */
+const dailyTasks = [
+  // Personal (left col top)
+  {title:"讀經",                   type:"personal", desc:"打開聖經，安靜讀一段經文，讓神的話語引導今天。",                         points:3},
+  {title:"運動",                   type:"personal", desc:"完成今日訓練：重訓 / 跑步 / 球類運動，喚醒身體狀態。",                   points:1},
+  // Work
+  {title:"總覽死線儀表板",          type:"work",     desc:"切到「死線警示板」，掌握今日 Ocard / 川輝 / Jadex 關鍵數字。",          points:1},
+  {title:"Ocard 高價值任務",        type:"work",     desc:"打開 Asana，處理今日最高優先級的 Ocard 業務任務。",                     points:2},
+  {title:"川輝 高價值提案報價",      type:"work",     desc:"優先推進川輝高額專案——報價、提案或實體拜訪安排。",                     points:2},
+  {title:"Ocard 開發自來客",        type:"work",     desc:"處理今日自來客詢問，套用痛點提問 SOP，嚴守 ≥8% 轉換目標。",            points:1},
+  {title:"Ocard 發票模組研究",       type:"work",     desc:"限時 30 分鐘：研究 Ocard 發票模組功能，累積產品知識。",                 points:1},
+  {title:"Ocard 陌生開發 8 個",     type:"work",     desc:"完成今日 8 個陌生開發聯繫，主動控制業績漏斗流量。",                     points:1.5},
+  {title:"川輝 陌生開發 5 個",       type:"work",     desc:"發送 5 封針對無數位化企業的客製化開發信。",                            points:1.5},
+  {title:"川輝 一般任務",            type:"work",     desc:"處理川輝今日待辦的一般性行政、跟進與回覆任務。",                        points:1},
+  {title:"Ocard Asana 一般任務",    type:"work",     desc:"清理 Asana 中的 Ocard 一般性任務，保持 inbox zero。",                  points:1},
+  {title:"Jadex 巡視",              type:"work",     desc:"巡視 Jadex 音響社群、訊息、進度，確保無遺漏。",                         points:1},
+  // Personal (right col bottom)
+  {title:"讀書",                   type:"personal", desc:"閱讀商業、銷售或自我成長書籍，每日累積顧問式思維。",                     points:1},
+  {title:"放鬆肌肉・護眼・護膚",    type:"personal", desc:"15分鐘肩頸拉筋、熱敷雙眼、點人工淚液、執行皮膚保養程序。",              points:1},
+];
+
+const BASE_MAX_SCORE = dailyTasks.reduce((a,t)=>a+t.points,0); // 19
+
+const verses = [
+  {text:"你們要先求祂的國和祂的義，這些東西都要加給你們了。", ref:"馬太福音 6:33"},
+  {text:"凡你手所當做的事要盡力去做；因為在你所必去的陰間沒有工作，沒有謀算，沒有知識，也沒有智慧。", ref:"傳道書 9:10"},
+  {text:"我靠著那加給我力量的，凡事都能做。", ref:"腓立比書 4:13"},
+  {text:"不可效法這個世界，只要心意更新而變化，叫你們察驗何為神的善良、純全、可喜悅的旨意。", ref:"羅馬書 12:2"},
+  {text:"你要專心仰賴耶和華，不可倚靠自己的聰明。", ref:"箴言 3:5"},
+  {text:"我的神必照他榮耀的豐富，在基督耶穌裡，使你們一切所需用的都充足。", ref:"腓立比書 4:19"},
+  {text:"所以，我的親愛弟兄們，你們務要堅固，不可搖動，常常竭力多做主工。", ref:"哥林多前書 15:58"}
+];
+
+const DAILY_KEY_PREFIX = 'daily_v2_';
+function todayKey() {
+  const d = new Date();
+  return DAILY_KEY_PREFIX + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+let checkedState = {};
+let bonusChecked = false;
+let bonusText = '';
+
+try {
+  const saved = JSON.parse(localStorage.getItem(todayKey()) || '{}');
+  checkedState = saved.tasks || {};
+  bonusChecked = saved.bonusChecked || false;
+  bonusText    = saved.bonusText    || '';
+} catch(e){}
+
+function saveDaily() {
+  try { localStorage.setItem(todayKey(), JSON.stringify({tasks: checkedState, bonusChecked, bonusText})); } catch(e){}
+}
+
+function buildDailyDate() {
+  const d = new Date();
+  const days = ['日','一','二','三','四','五','六'];
+  document.getElementById('dcp-date').textContent =
+    `${d.getFullYear()} · ${String(d.getMonth()+1).padStart(2,'0')} · ${String(d.getDate()).padStart(2,'0')} · 星期${days[d.getDay()]}`;
+}
+
+/* Split tasks into two columns:
+   Left:  personal (top) + first 6 work tasks
+   Right: remaining 6 work tasks + personal (bottom) */
+function buildDailyList() {
+  const colL = document.getElementById('daily-col-left');
+  const colR = document.getElementById('daily-col-right');
+  colL.innerHTML = '';
+  colR.innerHTML = '';
+
+  // Split: indices 0-1 personal, 2-13 work, but we split work 2-7 left, 8-13 right, then personal 12-13 right
+  // Actual split: left col = idx 0,1,2,3,4,5,6,7 | right col = idx 8,9,10,11,12,13
+  const leftIdx  = [0, 1, 2, 3, 4, 5, 6, 7];
+  const rightIdx = [8, 9, 10, 11, 12, 13];
+
+  function makeLabel(text, col) {
+    const lbl = document.createElement('div');
+    lbl.className = 'task-section-label';
+    lbl.textContent = text;
+    col.appendChild(lbl);
+  }
+
+  // Left col
+  makeLabel('🌿 個人任務', colL);
+  [0, 1].forEach(i => colL.appendChild(makeTaskRow(i)));
+  makeLabel('⚡ 工作任務', colL);
+  [2, 3, 4, 5, 6, 7].forEach(i => colL.appendChild(makeTaskRow(i)));
+
+  // Right col
+  makeLabel('⚡ 工作任務（續）', colR);
+  [8, 9, 10, 11].forEach(i => colR.appendChild(makeTaskRow(i)));
+  makeLabel('🌿 個人任務', colR);
+  [12, 13].forEach(i => colR.appendChild(makeTaskRow(i)));
+}
+
+function makeTaskRow(i) {
+  const task = dailyTasks[i];
+  const row = document.createElement('div');
+  row.className = `task-row ${task.type === 'work' ? 'work-row' : 'personal-row'}${checkedState[i] ? ' checked' : ''}`;
+  row.dataset.idx = i;
+  const ptsDisplay = task.points % 1 === 0 ? task.points : task.points.toFixed(1);
+  row.innerHTML = `
+    <div class="task-check-area">
+      <div class="task-checkbox"><span class="task-check-tick">✓</span></div>
+    </div>
+    <div class="task-content">
+      <div class="task-name">${task.title}</div>
+    </div>
+    <div class="task-meta">
+      <div class="task-pts">${ptsDisplay}</div>
+      <div class="task-pts-label">分</div>
+    </div>`;
+  row.addEventListener('click', () => toggleTask(i));
+  return row;
+}
+
+function toggleTask(idx) {
+  checkedState[idx] = !checkedState[idx];
+  saveDaily();
+  const row = document.querySelector(`.task-row[data-idx="${idx}"]`);
+  if (row) row.classList.toggle('checked', !!checkedState[idx]);
+  updateDailyScore();
+}
+
+/* ── Bonus ── */
+function toggleBonus() {
+  bonusChecked = !bonusChecked;
+  saveDaily();
+  const btn = document.getElementById('bonus-star');
+  btn.classList.toggle('active', bonusChecked);
+  updateDailyScore();
+}
+
+function saveBonusText() {
+  bonusText = document.getElementById('bonus-input').value;
+  saveDaily();
+}
+
+function updateDailyScore() {
+  let score = 0, doneCount = 0, workDone = 0, personalDone = 0;
+  dailyTasks.forEach((task, i) => {
+    if (checkedState[i]) {
+      score += task.points;
+      doneCount++;
+      if (task.type === 'work') workDone++;
+      else personalDone++;
+    }
+  });
+
+  const hasBonus = !!bonusText.trim();
+  const maxScore = BASE_MAX_SCORE + (hasBonus ? 1 : 0);
+  if (bonusChecked && hasBonus) { score += 1; doneCount++; }
+
+  const scoreDisplay = score % 1 === 0 ? score : score.toFixed(1);
+  document.getElementById('dcp-score').textContent = scoreDisplay;
+  document.getElementById('dcp-score-max').textContent = `/ ${maxScore % 1 === 0 ? maxScore : maxScore.toFixed(1)} 分`;
+  document.getElementById('dcp-total-count').textContent = dailyTasks.length + (hasBonus ? 1 : 0);
+
+  const pct = maxScore > 0 ? Math.round(score / maxScore * 100) : 0;
+  document.getElementById('dcp-bar-fill').style.width = pct + '%';
+  document.getElementById('dcp-pct').textContent = pct + '%';
+  document.getElementById('dcp-done-count').textContent = doneCount;
+  document.getElementById('dcp-work-count').textContent = workDone;
+  document.getElementById('dcp-personal-count').textContent = personalDone;
+
+  const fill    = document.getElementById('dcp-bar-fill');
+  const scoreEl = document.getElementById('dcp-score');
+  const color   = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--gold)' : 'var(--red)';
+  fill.style.background    = color;
+  scoreEl.style.color      = color;
+
+  // Done state: all fixed tasks done + bonus done if filled
+  const allFixed = dailyTasks.every((_,i) => !!checkedState[i]);
+  const allDone  = allFixed && (!hasBonus || bonusChecked);
+  const doneEl   = document.getElementById('daily-done');
+  if (allDone) {
+    doneEl.classList.add('visible');
+    const v = verses[new Date().getDay() % verses.length];
+    document.getElementById('done-verse').textContent = v.text;
+    document.getElementById('done-ref').textContent   = '— ' + v.ref;
+    setTimeout(()=>doneEl.scrollIntoView({behavior:'smooth',block:'nearest'}), 100);
+  } else {
+    doneEl.classList.remove('visible');
+  }
+}
+
+function resetDaily() {
+  checkedState = {};
+  bonusChecked = false;
+  bonusText    = '';
+  saveDaily();
+  buildDailyList();
+  document.getElementById('bonus-star').classList.remove('active');
+  document.getElementById('bonus-input').value = '';
+  updateDailyScore();
+  document.getElementById('daily-done').classList.remove('visible');
+}
+
+// Service Worker 註冊
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW error', e));
+  });
+}
+
+buildDailyList();
+document.getElementById('bonus-star').classList.toggle('active', bonusChecked);
+document.getElementById('bonus-input').value = bonusText;
+updateDailyScore();
+</script>
+</body>
+</html>
